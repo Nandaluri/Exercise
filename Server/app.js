@@ -1,13 +1,14 @@
 const express = require("express")
 const app = express()
 const path = require("path")
+require("dotenv").config()
 const port = 3000
 app.use(express.static(path.join(__dirname, "../views")))
 
 //connect to mongodb
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { error } = require("console")
-const uri = "mongodb+srv://Nanda:2375urwm@cluster0.i29yn8z.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.uri;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {

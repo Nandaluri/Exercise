@@ -6,7 +6,7 @@ const port = 3000
 app.use(express.static(path.join(__dirname, "../views")))
 
 //connect to mongodb
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
 const { error } = require("console")
 const uri = process.env.uri;
 
@@ -14,7 +14,7 @@ const uri = process.env.uri;
 const client = new MongoClient(uri, {
     serverApi: {
       version: ServerApiVersion.v1,
-      strict: true,
+      strict: false,
       deprecationErrors: true,
     }
   });
@@ -64,8 +64,29 @@ app.post("/api/users/:_id/exercises", (req,res) => {
 })
 
 app.get("/api/users/:_id/logs", (req,res) => {
-  console.log(req.params)
-  res.send("wow")
+  const nfrom = new Date(req.query.from)
+  const nto = new Date(req.query.to)
+  const o_id = new ObjectId(req.params._id)
+  console.log(o_id)
+  const getLogs = async () => {
+    let data;
+    await run().catch(console.dir)
+
+    const result = await client
+    .db("Exercise")
+    .collection("name_id")
+    .find({"_id": o_id})
+    .project({username: 1, count: 1,"_id": 1,log: {$filter: {input: "$log", cond: {$and: [{$gte: ["$$this.date", nfrom]}, {$lte: ["$$this.date", nto]}]}, limit: Number(req.query.limit)}}})
+
+
+    for await (const doc of result) {
+      data = doc;
+      console.log(doc);
+    }
+    await client.close()
+    res.send(data)
+  }
+    getLogs()
 })
 
 app.listen(port, () => {

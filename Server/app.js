@@ -84,7 +84,15 @@ app.get("/api/users/:_id/logs", (req,res) => {
       console.log(doc);
     }
     await client.close()
-    res.send(data)
+    data.log.forEach(element => {
+      element.date = element.date.toDateString()
+    });
+    res.send({
+      username : data.username,
+      count : data.count,
+      _id : data._id,
+      log : data.log
+    })
   }
     getLogs()
 })

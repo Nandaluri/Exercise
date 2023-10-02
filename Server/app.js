@@ -3,9 +3,7 @@ const app = express()
 const path = require("path")
 require("dotenv").config()
 const port = process.env.PORT || 3000
-const router = express.Router();
 app.use(express.static(path.join(__dirname, "../views")))
-app.use("/.netlify/functions/api", router)
 
 //connect to mongodb
 const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');

@@ -109,43 +109,7 @@ app.post("/api/users/:_id/exercises", (req,res) => {
 app.get("/api/users/:_id/logs", (req,res) => {
 
   //functions
-  //Get logs from user only based on _id
-  async function getLogsWithoutParams(){
-    const o_id = new ObjectId(req.params._id)
-    let data;
-    const result = await client
-    .db("Exercise")
-    .collection("name_id")
-    .find({"_id": o_id})
-
-    //Get the data from cursor
-    for await (const doc of result) {
-      data = doc;
-    }
-
-    //format Dates to match fcc template
-    data.log.forEach(element => {
-      element.date = element.date.toDateString()
-      element.duration = Number(element.duration)
-    });
-
-    res.send({
-      username : data.username,
-      count : data.count,
-      _id : data._id,
-      log : data.log
-    })
-  }
-  
-
   //return log from user based on id, From, To and Limit
-  async function getLogs() {
-    const {from, to, limit} = req.query;
-    const id = req.params._id;
-    const user = await User.findById(id)
-  }
-
-
   async function getLogsWithParams(){
     const nfrom = new Date(req.query.from ?? new Date("0000-00-00"))
     const nto = new Date(req.query.to ?? new Date("3000-12-12"))
@@ -177,19 +141,6 @@ app.get("/api/users/:_id/logs", (req,res) => {
     })
   }
 
-
-  //When to return full list of all users with id
-  /*try{
-    if(!req.query.limit && !req.query.from && !req.query.to){
-    getLogsWithoutParams()
-  } else if (req.query.limit && req.query.from && req.query.to) {
-    getLogsWithParams()
-  } else {
-    res.send("You are missing an input. Please try again")
-  }
-  } catch(err){
-    console.log("something didnt work as it should. Try again")
-  }*/
   try{
     getLogsWithParams()
   } catch(err){

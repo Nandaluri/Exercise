@@ -77,6 +77,19 @@ app.post("/api/users", (req,res) => {
     createUser()
 })
 
+app.get("/api/users", (req,res) => {
+  async function getAllUsers(){
+    const data = []
+    const response = await client.db("Exercise").collection("name_id").find({}).project({username: 1, "_id": 1})
+      for await (const item of response){
+        data.push(item)
+      }
+    res.send(data)
+  }
+
+  getAllUsers()
+})
+
 app.post("/api/users/:_id/exercises", (req,res) => {
     const o_id = new ObjectId(req.params._id)
     const ndate = new Date(req.body.date)
@@ -97,14 +110,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
 
   //functions
   //Get all yousers from database and include only id and username
-  async function getAllUsers(){
-    const data = []
-    const response = await client.db("Exercise").collection("name_id").find({}).project({username: 1, "_id": 1})
-      for await (const item of response){
-        data.push(item)
-      }
-    res.send(data)
-  }
+  
 
   //return log from user based on id, From, To and Limit
   async function getSingleUserAndLogs(){

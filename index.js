@@ -92,7 +92,7 @@ app.get("/api/users", (req,res) => {
 
 app.post("/api/users/:_id/exercises", (req,res) => {
     const o_id = new ObjectId(req.params._id)
-    const ndate = new Date(req.body.date)
+    const ndate = req.body.date? new Date(req.body.date) : new Date()
     const createExercise = async () => {
         //await run().catch(console.dir)
       try{
@@ -125,7 +125,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
 
     //format Dates to match fcc template
     data.log.forEach(element => {
-      //element.date = element.date.toDateString()
+      element.date = element.date.toDateString()
       element.duration = Number(element.duration)
     });
 
@@ -158,7 +158,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
     }
     //format Dates to match fcc template
     data.log.forEach(element => {
-      //element.date = element.date.toDateString()
+      element.date = element.date.toDateString()
       element.duration = Number(element.duration)
     });
     //Deliver data to user

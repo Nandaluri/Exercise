@@ -84,27 +84,34 @@ app.post("/api/users/:_id/exercises", (req,res) => {
         //await run().catch(console.dir)
       try{
         const result = await client.db("Exercise").collection("name_id").findOneAndUpdate({"_id": o_id}, {$inc: {count: 1}, $push: {log: {description: req.body.description, duration: req.body.duration, date: ndate}}}, {returnNewDocument: true})
-        res.send({_id: result._id, username: result.username, date: ndate.toDateString(), duration: req.body.duration, description: req.body.description})
+        res.send({_id: result._id, username: result.username, date: ndate.toDateString(), duration: parseInt(req.body.duration), description: req.body.description})
       } catch(err){
         console.log(err)
         res.send("something went wrong. Please check that your inputs are corret and try again")
       }
-        
-
-        //console.log(result)
-        //await client.close()
-        
     }
     createExercise()
 })
 
 app.get("/api/users/:_id/logs", (req,res) => {
-  const nfrom = new Date(req.query.from)
-  const nto = new Date(req.query.to)
-  const o_id = new ObjectId(req.params._id)
-  const getLogs = async () => {
+
+  //functions
+  //Get all yousers from database and include only id and username
+  async function getAllUsers(){
+    const data = []
+    const response = await client.db("Exercise").collection("name_id").find({}).project({username: 1, "_id": 1})
+      for await (const item of response){
+        data.push(item)
+      }
+    res.send(data)
+  }
+
+  //return log from user based on id, From, To and Limit
+  async function getSingleUserAndLogs(){
+    const nfrom = new Date(req.query.from)
+    const nto = new Date(req.query.to)
+    const o_id = new ObjectId(req.params._id)
     let data;
-    //await run().catch(console.dir)
 
     const result = await client
     .db("Exercise")
@@ -112,15 +119,15 @@ app.get("/api/users/:_id/logs", (req,res) => {
     .find({"_id": o_id})
     .project({username: 1, count: 1,"_id": 1,log: {$filter: {input: "$log", cond: {$and: [{$gte: ["$$this.date", nfrom]}, {$lte: ["$$this.date", nto]}]}, limit: Number(req.query.limit)}}})
 
-
+    //
     for await (const doc of result) {
       data = doc;
-      //console.log(doc);
     }
-    //await client.close()
+    //format Dates to match fcc template
     data.log.forEach(element => {
       element.date = element.date.toDateString()
     });
+
     res.send({
       username : data.username,
       count : data.count,
@@ -128,7 +135,21 @@ app.get("/api/users/:_id/logs", (req,res) => {
       log : data.log
     })
   }
-    getLogs()
+
+
+  //When to return full list of all users with id
+  try{
+    if(!req.query.limit && !req.query.from && !req.query.to){
+    getAllUsers()
+  } else if (req.query.limit && req.query.from && req.query.to) {
+    getSingleUserAndLogs()
+  } else {
+    res.send("You are missing an input. Please try again")
+  }
+  } catch(err){
+    console.log("something didnt work as it should. Try again")
+  }
+  
 })
 
 

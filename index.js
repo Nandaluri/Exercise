@@ -139,9 +139,16 @@ app.get("/api/users/:_id/logs", (req,res) => {
   
 
   //return log from user based on id, From, To and Limit
+  async function getLogs() {
+    const {from, to, limit} = req.query;
+    const id = req.params._id;
+    const user = await User.findById(id)
+  }
+
+
   async function getLogsWithParams(){
-    const nfrom = new Date(req.query.from)
-    const nto = new Date(req.query.to)
+    const nfrom = new Date(req.query.from ?? new Date("0000-00-00"))
+    const nto = new Date(req.query.to ?? new Date("3000-12-12"))
     const o_id = new ObjectId(req.params._id)
     let data;
 
@@ -150,7 +157,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
     .db("Exercise")
     .collection("name_id")
     .find({"_id": o_id})
-    .project({username: 1, count: 1,"_id": 1,log: {$filter: {input: "$log", cond: {$and: [{$gte: ["$$this.date", nfrom]}, {$lte: ["$$this.date", nto]}]}, limit: Number(req.query.limit)}}})
+    .project({username: 1, count: 1,"_id": 1,log: {$filter: {input: "$log", cond: {$and: [{$gte: ["$$this.date", nfrom]}, {$lte: ["$$this.date", nto]}]}, limit: Number(req.query.limit ?? 500)}}})
 
     //Get the data from cursor
     for await (const doc of result) {
@@ -172,7 +179,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
 
 
   //When to return full list of all users with id
-  try{
+  /*try{
     if(!req.query.limit && !req.query.from && !req.query.to){
     getLogsWithoutParams()
   } else if (req.query.limit && req.query.from && req.query.to) {
@@ -182,8 +189,13 @@ app.get("/api/users/:_id/logs", (req,res) => {
   }
   } catch(err){
     console.log("something didnt work as it should. Try again")
+  }*/
+  try{
+    getLogsWithParams()
+  } catch(err){
+    console.log(err)
   }
-  
+
 })
 
 

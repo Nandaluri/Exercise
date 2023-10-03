@@ -109,31 +109,59 @@ app.post("/api/users/:_id/exercises", (req,res) => {
 app.get("/api/users/:_id/logs", (req,res) => {
 
   //functions
-  //Get all yousers from database and include only id and username
+  //Get logs from user only based on _id
+  async function getLogsWithoutParams(){
+    const o_id = new ObjectId(req.params._id)
+    let data;
+    const result = await client
+    .db("Exercise")
+    .collection("name_id")
+    .find({"_id": o_id})
+
+    //Get the data from cursor
+    for await (const doc of result) {
+      data = doc;
+    }
+
+    //format Dates to match fcc template
+    data.log.forEach(element => {
+      element.date = element.date.toDateString()
+      element.duration = Number(element.duration)
+    });
+
+    res.send({
+      username : data.username,
+      count : data.count,
+      _id : data._id,
+      log : data.log
+    })
+  }
   
 
   //return log from user based on id, From, To and Limit
-  async function getSingleUserAndLogs(){
+  async function getLogsWithParams(){
     const nfrom = new Date(req.query.from)
     const nto = new Date(req.query.to)
     const o_id = new ObjectId(req.params._id)
     let data;
 
+    //Send query to database
     const result = await client
     .db("Exercise")
     .collection("name_id")
     .find({"_id": o_id})
     .project({username: 1, count: 1,"_id": 1,log: {$filter: {input: "$log", cond: {$and: [{$gte: ["$$this.date", nfrom]}, {$lte: ["$$this.date", nto]}]}, limit: Number(req.query.limit)}}})
 
-    //
+    //Get the data from cursor
     for await (const doc of result) {
       data = doc;
     }
     //format Dates to match fcc template
     data.log.forEach(element => {
       element.date = element.date.toDateString()
+      element.duration = Number(element.duration)
     });
-
+    //Deliver data to user
     res.send({
       username : data.username,
       count : data.count,
@@ -146,9 +174,9 @@ app.get("/api/users/:_id/logs", (req,res) => {
   //When to return full list of all users with id
   try{
     if(!req.query.limit && !req.query.from && !req.query.to){
-    getAllUsers()
+    getLogsWithoutParams()
   } else if (req.query.limit && req.query.from && req.query.to) {
-    getSingleUserAndLogs()
+    getLogsWithParams()
   } else {
     res.send("You are missing an input. Please try again")
   }

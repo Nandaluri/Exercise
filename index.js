@@ -79,12 +79,18 @@ app.post("/api/users/:_id/exercises", (req,res) => {
     const ndate = new Date(req.body.date)
     const createExercise = async () => {
         //await run().catch(console.dir)
-
+      try{
         const result = await client.db("Exercise").collection("name_id").findOneAndUpdate({"_id": o_id}, {$inc: {count: 1}, $push: {log: {description: req.body.description, duration: req.body.duration, date: ndate}}}, {returnNewDocument: true})
+        res.send({_id: result._id, username: result.username, date: ndate.toDateString(), duration: req.body.duration, description: req.body.description})
+      } catch(err){
+        console.log(err)
+        res.send("something went wrong. Please check that your inputs are corret and try again")
+      }
+        
 
         //console.log(result)
         //await client.close()
-        res.send({_id: result._id, username: result.username, date: ndate.toDateString(), duration: req.body.duration, description: req.body.description})
+        
     }
     createExercise()
 })

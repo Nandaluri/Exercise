@@ -125,7 +125,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
 
     //format Dates to match fcc template
     data.log.forEach(element => {
-      element.date = element.date.toDateString()
+      //element.date = element.date.toDateString()
       element.duration = Number(element.duration)
     });
 
@@ -158,7 +158,7 @@ app.get("/api/users/:_id/logs", (req,res) => {
     }
     //format Dates to match fcc template
     data.log.forEach(element => {
-      element.date = element.date.toDateString()
+      //element.date = element.date.toDateString()
       element.duration = Number(element.duration)
     });
     //Deliver data to user

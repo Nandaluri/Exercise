@@ -96,7 +96,7 @@ app.post("/api/users/:_id/exercises", (req,res) => {
     const createExercise = async () => {
         //await run().catch(console.dir)
       try{
-        const result = await client.db("Exercise").collection("name_id").findOneAndUpdate({"_id": o_id}, {$inc: {count: 1}, $push: {log: {description: req.body.description, duration: req.body.duration, date: ndate}}}, {returnNewDocument: true})
+        const result = await client.db("Exercise").collection("name_id").findOneAndUpdate({"_id": o_id}, {$inc: {count: 1}, $push: {log: {description: req.body.description, duration: req.body.duration, date: ndate ?? new Date()}}}, {returnNewDocument: true})
         res.send({_id: result._id, username: result.username, date: ndate.toDateString(), duration: parseInt(req.body.duration), description: req.body.description})
       } catch(err){
         console.log(err)
